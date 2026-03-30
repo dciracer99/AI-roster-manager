@@ -115,7 +115,7 @@ export default function BulkImportForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          rawText: rawText.slice(0, 10000), // Limit to ~10k chars to manage tokens
+          rawText: rawText,
           userName: userName.trim(),
           contactName: resolvedContactName,
         }),
@@ -305,7 +305,7 @@ export default function BulkImportForm({
       <textarea
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
-        rows={10}
+        rows={14}
         className="w-full bg-rm-bg border border-rm-border rounded-lg px-3 py-2.5 text-rm-text text-sm resize-none font-mono"
         placeholder={
           mode === "smart"
@@ -323,9 +323,9 @@ export default function BulkImportForm({
 
       {/* Preview */}
       {preview && preview.length > 0 && (
-        <div className="max-h-48 overflow-y-auto space-y-1 border border-rm-border rounded-lg p-3">
+        <div className="max-h-64 overflow-y-auto space-y-1 border border-rm-border rounded-lg p-3">
           <div className="text-xs text-rm-muted mb-2 font-medium">
-            Preview ({preview.length} messages)
+            Preview ({preview.length} messages) — scroll to review
           </div>
           {preview.map((msg, idx) => (
             <div
@@ -367,7 +367,9 @@ export default function BulkImportForm({
           disabled={parsing || !rawText.trim()}
           className="w-full py-3 bg-rm-card border border-rm-accent text-rm-accent rounded-lg font-semibold text-sm min-h-[44px] disabled:opacity-50"
         >
-          {parsing ? "Parsing with AI..." : "Parse with AI"}
+          {parsing
+            ? `Parsing${rawText.length > 15000 ? ` (${Math.ceil(rawText.length / 15000)} chunks)` : ""}...`
+            : `Parse with AI${rawText.length > 15000 ? ` (${Math.ceil(rawText.length / 15000)} chunks)` : ""}`}
         </button>
       )}
 
