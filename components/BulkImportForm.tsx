@@ -127,8 +127,9 @@ export default function BulkImportForm({
         setResult(`Error: ${data.error}`);
       } else if (data.messages && data.messages.length > 0) {
         setPreview(data.messages);
+        const chunkInfo = data.chunks > 1 ? ` (processed in ${data.chunks} chunks)` : "";
         setResult(
-          `Parsed ${data.messages.length} messages. Review below and click Import.`
+          `Parsed ${data.messages.length} messages${chunkInfo}. Review below and click Import.`
         );
       } else {
         setResult("No messages could be parsed. Try a different format.");
@@ -368,8 +369,8 @@ export default function BulkImportForm({
           className="w-full py-3 bg-rm-card border border-rm-accent text-rm-accent rounded-lg font-semibold text-sm min-h-[44px] disabled:opacity-50"
         >
           {parsing
-            ? `Parsing${rawText.length > 15000 ? ` (${Math.ceil(rawText.length / 15000)} chunks)` : ""}...`
-            : `Parse with AI${rawText.length > 15000 ? ` (${Math.ceil(rawText.length / 15000)} chunks)` : ""}`}
+            ? `Parsing${rawText.length > 5000 ? ` (${Math.ceil(rawText.length / 5000)} chunks)` : ""}...`
+            : `Parse with AI${rawText.length > 5000 ? ` (${Math.ceil(rawText.length / 5000)} chunks)` : ""}`}
         </button>
       )}
 

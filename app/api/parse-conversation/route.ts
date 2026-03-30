@@ -97,8 +97,8 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    // Split into ~15k char chunks (safe for Haiku context window)
-    const chunks = splitIntoChunks(rawText, 15000);
+    // Split into ~5k char chunks so AI can output all messages within token limits
+    const chunks = splitIntoChunks(rawText, 5000);
     const allMessages: ParsedMessage[] = [];
 
     // Process chunks sequentially to maintain order
