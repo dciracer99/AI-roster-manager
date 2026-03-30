@@ -13,6 +13,7 @@ import BottomNav from "@/components/BottomNav";
 import BottomSheet from "@/components/BottomSheet";
 import LogInteractionForm from "@/components/LogInteractionForm";
 import AddContactForm from "@/components/AddContactForm";
+import BulkImportForm from "@/components/BulkImportForm";
 
 interface Contact {
   id: string;
@@ -49,6 +50,7 @@ export default function ThreadView() {
   const [showExplain, setShowExplain] = useState(false);
   const [showDraft, setShowDraft] = useState(false);
   const [showToxic, setShowToxic] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
   const [explanation, setExplanation] = useState("");
   const [draft, setDraft] = useState("");
   const [toxicData, setToxicData] = useState<{
@@ -408,6 +410,12 @@ export default function ThreadView() {
           </div>
           <div className="flex gap-2 mt-2">
             <button
+              onClick={() => setShowBulk(true)}
+              className="flex-1 py-2 text-rm-accent text-xs font-medium min-h-[44px]"
+            >
+              Bulk Import
+            </button>
+            <button
               onClick={() => setShowEdit(true)}
               className="flex-1 py-2 text-rm-muted text-xs min-h-[44px]"
             >
@@ -577,6 +585,17 @@ export default function ThreadView() {
             </p>
           </div>
         ) : null}
+      </BottomSheet>
+
+      {/* Bulk Import Sheet */}
+      <BottomSheet open={showBulk} onClose={() => setShowBulk(false)}>
+        <BulkImportForm
+          contactId={contactId}
+          onComplete={() => {
+            setShowBulk(false);
+            window.location.reload();
+          }}
+        />
       </BottomSheet>
 
       <BottomNav />
