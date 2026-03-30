@@ -22,14 +22,16 @@ export default function AddContactForm({
   const [notes, setNotes] = useState(editContact?.notes || "");
   const [replyTone, setReplyTone] = useState(editContact?.reply_tone || "");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
+    setError("");
 
     if (editContact) {
-      await supabase
+      const { error: updateError } = await supabase
         .from("contacts")
         .update({
           name: name.trim(),
@@ -38,19 +40,35 @@ export default function AddContactForm({
           reply_tone: replyTone.trim() || null,
         })
         .eq("id", editContact.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
     } else {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setError("Not authenticated. Please log in again.");
+        setLoading(false);
+        return;
+      }
 
-      await supabase.from("contacts").insert({
+      const { error: insertError } = await supabase.from("contacts").insert({
         user_id: user.id,
         name: name.trim(),
         tier,
         notes: notes.trim() || null,
         reply_tone: replyTone.trim() || null,
       });
+
+      if (insertError) {
+        setError(insertError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     setLoading(false);
@@ -132,6 +150,12 @@ export default function AddContactForm({
           placeholder="e.g. casual and funny, flirty but cool"
         />
       </div>
+
+      {error && (
+        <div className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
 
       <button
         type="submit"
