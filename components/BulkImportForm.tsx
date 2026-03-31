@@ -266,6 +266,45 @@ export default function BulkImportForm({
       const trimmed = line.trim();
       if (!trimmed) continue;
 
+      // Format: [2026-03-21 02:44] outgoing: message
+      // or:     [2026-03-21 02:44] incoming: message
+      const timestampedMatch = trimmed.match(
+        /^\[(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\]\s*(outgoing|incoming|sent|received)\s*:\s*(.*)/i
+      );
+      if (timestampedMatch) {
+        const [, dateStr, dir, content] = timestampedMatch;
+        const direction =
+          dir.toLowerCase() === "outgoing" || dir.toLowerCase() === "sent"
+            ? "sent"
+            : "received";
+        const detectedDate = new Date(dateStr.replace(" ", "T"));
+        const msgContent = content.trim();
+        if (msgContent) {
+          messages.push({
+            direction,
+            content: msgContent,
+            detectedDate: !isNaN(detectedDate.getTime())
+              ? detectedDate
+              : null,
+          });
+        }
+        continue;
+      }
+
+      // Format: outgoing: message  or  incoming: message (no timestamp)
+      const directionMatch = trimmed.match(
+        /^(outgoing|incoming)\s*:\s*(.+)/i
+      );
+      if (directionMatch) {
+        const [, dir, content] = directionMatch;
+        messages.push({
+          direction:
+            dir.toLowerCase() === "outgoing" ? "sent" : "received",
+          content: content.trim(),
+        });
+        continue;
+      }
+
       const meMatch = trimmed.match(/^(me|i|sent|you|>>?)\s*[:>\-]\s*(.+)/i);
       const themMatch = trimmed.match(
         /^(them|they|received|<<?\s*)\s*[:>\-]\s*(.+)/i
