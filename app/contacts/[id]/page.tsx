@@ -435,6 +435,19 @@ export default function ThreadView() {
     setBulkDeleting(false);
   }
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    const { data } = await supabase
+      .from("interactions")
+      .select("*")
+      .eq("contact_id", contactId)
+      .order("logged_at", { ascending: false });
+    if (data) setInteractions(data as Interaction[]);
+    setTimeout(() => setRefreshing(false), 500);
+  }
+
   function copyToClipboard() {
     navigator.clipboard.writeText(draft);
     setCopied(true);
@@ -530,12 +543,21 @@ export default function ThreadView() {
                 {tierLabels[contact.tier]}
               </span>
             </div>
-            <button
-              onClick={handleExplainScore}
-              className={`text-3xl font-bold tabular-nums ${scoreColor}`}
-            >
-              {score}
-            </button>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleExplainScore}
+                className={`text-3xl font-bold tabular-nums ${scoreColor}`}
+              >
+                {score}
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className={`text-[10px] text-rm-muted mt-0.5 min-h-[24px] ${refreshing ? "animate-pulse" : ""}`}
+              >
+                {refreshing ? "↻ refreshing..." : "↻ refresh"}
+              </button>
+            </div>
           </div>
 
           {/* Rating */}
